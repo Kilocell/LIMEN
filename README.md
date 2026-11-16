@@ -15,6 +15,7 @@ LIMEN es un simulador, no un instrumento de medición, y sus números cuentan co
 - [Run it (English)](#run-it-english)
 - [Cómo ejecutarlo (Español)](#cómo-ejecutarlo-español)
 - [What you should see](#what-you-should-see)
+- [Presets](#presets)
 - [Model assumptions](#model-assumptions)
 - [Where the code is](#where-the-code-is)
 - [License](#license)
@@ -227,7 +228,7 @@ The material numbers (effective and group index, loss, bend loss, thermo-optic c
 - **Wavelength.** Both waveguide platforms are designed for 1550 nm. The page keeps an optional O-band (1310 nm) mode, but the O-band cannot drive the 1550 nm ring.
 - **Energy per bit.** Copper and optical energy are counted the same way. Both pay a PHY, the serialiser, equaliser and clocking, whose energy per bit is `E_serdes · (0.25 + 0.75 · loss / mask) + E_fec`. Copper pays it for the full channel, trace and fixture. The optical lane pays it for a short electrical hop from each die to its optical engine, which sees two thirds of the fixture loss (`phyFixedShare`, `opticalFixtureShare`). The optical lane then adds the laser, the modulator drive and the receiver.
 - **Receiver bandwidth.** The photodiode and transimpedance amplifier are a one-pole filter at 0.7 of the symbol rate (`rxBwFrac`), with the matching noise bandwidth. Faster lanes therefore lose eye height to inter-symbol interference as well as to noise, and the lane rate cannot go below 2.5 Gbit/s.
-- **Laser power.** The laser is sized per lane so the modulator launches 1 mW at its on level, up to a 20 mW limit. A lossy or under-driven modulator therefore costs wall-plug watts first (10 % efficiency, shared laser still pays for every lane) and eye height only once the laser runs out. 
+- **Laser power.** The laser is sized per lane so the modulator launches 1 mW at its on level, up to a 20 mW limit. A lossy or under-driven modulator therefore costs wall-plug watts first (10 % efficiency, shared laser still pays for every lane) and eye height only once the laser runs out.
 - **Ring size.** The silicon-nitride ring is 503 µm around (radius 80.1 µm), just above an 80 µm bend limit. At that size the free spectral range is only 2.3 nm, so each ring coupler is set to 70 % power coupling to keep a roughly 80 GHz drop passband, wider than the 32 Gbaud symbol rate.
 - **Coupler loss.** Directional couplers are not lossless. Each has 0.1 dB of excess loss on top of its power split (`COUPLER_EXCESS_DB`), so a tap passes `(1 − ratio) · 10^(−x/10)` on the through port and `ratio · 10^(−x/10)` on the tap port. The four ring couplers pay it too.
 - **Crossover curve.** The sweep from 2 to 60 cm (`solveFrontier`) solves the link at every length instead of anchoring on a fixed reference:
@@ -241,7 +242,7 @@ The material numbers (effective and group index, loss, bend loss, thermo-optic c
 Assumptions that are stated rather than measured, so change them for your board:
 
 - The modulator figures (`MODULATORS`: Vπ·L, loss per mm, excess loss, capacitance per mm, bandwidth·length, static extinction) are representative published-range values for each material, not a vendor's data. Rank the materials with them, but do not quote the absolute numbers.
-- Copper receiver noise is 8 nV/√Hz (about 1 mV rms over a 16 GHz Nyquist band) and aggregate crosstalk is −26 dB, which caps an NRZ copper eye near Q ≈ 20 and a PAM4 eye near Q ≈ 8. They are `rxNoise` and `copperXtalk`. On the seven presets copper Q is already 16 to 25, so these two do not move any result there.
+- Copper receiver noise is 8 nV/√Hz (about 1 mV rms over a 16 GHz Nyquist band) and aggregate crosstalk is −26 dB, which caps an NRZ copper eye near Q ≈ 20 and a PAM4 eye near Q ≈ 8. They are `rxNoise` and `copperXtalk`. On the seven presets copper Q is already 18 to 25, so these two do not move any result there.
 - Q comes from one seeded record, so it carries about ±20 % sampling jitter at 128 symbols. The closed-form parts (loss, resonance, energy) do not.
 - PAM4 optics at 64 and 112 Gbit/s have a Q of 2 to 3 at 10 cm, far short of the 1e-6 pre-FEC target (Q about 4.75 for four levels), so they read down. Copper PAM4 meets the target at 64 Gbit/s (Q 7.5) and misses it at 112 Gbit/s (Q 4.4). The crossover for PAM4 is therefore "none".
 
